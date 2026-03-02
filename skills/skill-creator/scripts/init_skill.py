@@ -6,9 +6,9 @@ Usage:
     init_skill.py <skill-name> --path <path>
 
 Examples:
-    init_skill.py my-new-skill --path skills/public
-    init_skill.py my-api-helper --path skills/private
-    init_skill.py custom-skill --path /custom/location
+    init_skill.py my-new-skill --path skills/public/my-new-skill
+    init_skill.py my-api-helper --path skills/private/my-api-helper
+    init_skill.py custom-skill --path /custom/location/custom-skill
 """
 
 import sys
@@ -193,30 +193,33 @@ def title_case_skill_name(skill_name):
 
 def init_skill(skill_name, path):
     """
-    Initialize a new skill directory with template SKILL.md.
+    Initialize a new skill in the specified directory with template SKILL.md.
 
     Args:
         skill_name: Name of the skill
-        path: Path where the skill directory should be created
+        path: Path where the skill should be initialized (becomes the skill root directory)
 
     Returns:
-        Path to created skill directory, or None if error
+        Path to skill directory, or None if error
     """
-    # Determine skill directory path
-    skill_dir = Path(path).resolve() / skill_name
+    # Resolve the skill directory path (use path directly, don't create subdirectory)
+    skill_dir = Path(path).resolve()
 
-    # Check if directory already exists
+    # Check if directory exists and is not empty
     if skill_dir.exists():
-        print(f"[x] Error: Skill directory already exists: {skill_dir}")
-        return None
-
-    # Create skill directory
-    try:
-        skill_dir.mkdir(parents=True, exist_ok=False)
-        print(f"[OK] Created skill directory: {skill_dir}")
-    except Exception as e:
-        print(f"[x] Error creating directory: {e}")
-        return None
+        if any(skill_dir.iterdir()):
+            print(f"[x] Error: Directory is not empty: {skill_dir}")
+            print("    Please provide an empty directory or a non-existent path")
+            return None
+        print(f"[OK] Using existing empty directory: {skill_dir}")
+    else:
+        # Create skill directory
+        try:
+            skill_dir.mkdir(parents=True, exist_ok=False)
+            print(f"[OK] Created skill directory: {skill_dir}")
+        except Exception as e:
+            print(f"[x] Error creating directory: {e}")
+            return None
 
     # Create SKILL.md from template
     skill_title = title_case_skill_name(skill_name)
@@ -261,11 +264,12 @@ def init_skill(skill_name, path):
         return None
 
     # Print next steps
-    print(f"\n[OK] Skill '{skill_name}' initialized successfully at {skill_dir}")
+    print(f"\n[OK] Skill '{skill_name}' initialized successfully")
+    print(f"    Location: {skill_dir}")
     print("\nNext steps:")
     print("1. Edit SKILL.md to complete the TODO items and update the description")
     print("2. Customize or delete the example files in scripts/, references/, and assets/")
-    print("3. Run the validator when ready to check the skill structure")
+    print("3. Run validate_skill.py when ready to check the skill structure")
 
     return skill_dir
 
@@ -273,15 +277,15 @@ def init_skill(skill_name, path):
 def main():
     if len(sys.argv) < 4 or sys.argv[2] != '--path':
         print("Usage: init_skill.py <skill-name> --path <path>")
+        print("\nThe skill will be initialized directly in the specified directory.")
         print("\nSkill name requirements:")
         print("  - Hyphen-case identifier (e.g., 'data-analyzer')")
         print("  - Lowercase letters, digits, and hyphens only")
         print("  - Max 40 characters")
-        print("  - Must match directory name exactly")
         print("\nExamples:")
-        print("  init_skill.py my-new-skill --path skills/public")
-        print("  init_skill.py my-api-helper --path skills/private")
-        print("  init_skill.py custom-skill --path /custom/location")
+        print("  init_skill.py my-new-skill --path skills/public/my-new-skill")
+        print("  init_skill.py my-api-helper --path skills/private/my-api-helper")
+        print("  init_skill.py custom-skill --path /custom/location/custom-skill")
         sys.exit(1)
 
     skill_name = sys.argv[1]
