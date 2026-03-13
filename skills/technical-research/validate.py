@@ -62,4 +62,4 @@ if __name__ == "__main__":
     print(f"{'✅ PASS' if valid else '❌ FAIL'} - {title}")
     for issue in issues:
         print(f"  - {issue}")
-    sys.exit(0 if valid else 1)s
+    sys.exit(0 if valid else 1)

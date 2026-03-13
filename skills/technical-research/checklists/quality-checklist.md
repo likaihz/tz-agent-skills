@@ -74,4 +74,14 @@
 - [ ] 总分 ≥ 15 分
 - [ ] 无严重错误 (准确性问题)
 - [ ] 至少 1 人 Review
-- [ ] 已更新 SUMMARY.md 索引
+- [ ] **已更新 SUMMARY.md 索引** (必须完成)
+
+## 索引更新验证
+
+```bash
+# 运行索引更新脚本
+python scripts/update_index.py research/
+
+# 验证新文档已在索引中
+grep "文档标题" research/SUMMARY.md
+```

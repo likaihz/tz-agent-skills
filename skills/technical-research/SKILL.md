@@ -1,6 +1,6 @@
 ---
 name: technical-research
-description: 技术调研专家技能，提供系统化的技术调研方法论、文档规范、最佳实践。当需要进行技术选型、架构调研、框架对比、实现方案研究时触发此技能。
+description: 技术调研专家技能。当需要进行技术选型、架构调研、框架对比、实现方案研究、技术问题排查时触发。触发词：调研、选型、对比、方案、技术评估、架构设计。调研完成后必须自动更新索引文件。
 ---
 
 # Technical Research Skill
@@ -140,6 +140,57 @@ evaluation = {
 [链接列表]
 ```
 
+### 阶段 5: 更新索引 (必须执行)
+
+**重要性**：索引文件是调研知识库的入口，保持索引更新确保后续可检索性。
+
+**索引文件位置**：`research/SUMMARY.md`
+
+**索引结构**：
+
+```markdown
+# 技术调研索引
+
+## AI/LLM
+- [RAG 架构设计](ai-llm/2026-02-22-rag-architecture.md) - 2026-02-22
+- [Embedding 模型对比](ai-llm/2026-02-20-embedding-models.md) - 2026-02-20
+
+## Frontend
+- [React 状态管理方案](frontend/2026-02-15-state-management.md) - 2026-02-15
+
+## Backend
+- [API 网关选型](backend/2026-02-10-api-gateway.md) - 2026-02-10
+
+## Database
+- [时序数据库对比](database/2026-02-05-timeseries-db.md) - 2026-02-05
+```
+
+**自动更新流程**：
+
+1. **读取现有索引**：检查 `research/SUMMARY.md` 是否存在
+2. **确定分类**：根据文档 `topic` 字段归类
+3. **添加条目**：按日期倒序插入到对应分类
+4. **验证链接**：确保文件路径正确
+
+**执行方式**：
+
+```bash
+# 方式 1: 使用自动生成脚本
+python scripts/update_index.py research/
+
+# 方式 2: 手动编辑
+# 在 SUMMARY.md 对应分类下添加新行
+- [文档标题](topic/YYYY-MM-DD-filename.md) - YYYY-MM-DD
+```
+
+**自动化脚本** (`scripts/update_index.py`)：
+
+见技能目录下的脚本，支持：
+- 扫描所有调研文档
+- 提取 YAML frontmatter 元数据
+- 按分类和日期排序
+- 生成标准格式索引
+
 ## 文档规范
 
 ### YAML Frontmatter (必需)
@@ -244,6 +295,24 @@ related: [相关文档路径]
 - [ ] 适用场景是否明确 (不误导)
 - [ ] YAML frontmatter 是否正确
 - [ ] 文档是否放在正确目录
+- [ ] **索引文件是否已更新** (必须完成)
+
+## 调研完成标准
+
+一份完整的调研输出必须包含：
+
+```
+research/
+├── SUMMARY.md           # ✅ 索引已更新
+└── {topic}/
+    └── YYYY-MM-DD-{name}.md  # ✅ 调研文档
+```
+
+**索引更新检查**：
+```bash
+# 验证新文档已在索引中
+grep "YYYY-MM-DD-{name}" research/SUMMARY.md
+```
 
 ## 常见反模式
 
@@ -292,16 +361,19 @@ task(subagent_type="librarian", prompt="...")
 # 使用模板
 cp docs/templates/research-template.md research/ai-llm/YYYY-MM-DD-topic.md
 
-# 更新索引
-编辑 SUMMARY.md 添加新文档
+# 更新索引 (调研完成后必须执行)
+python scripts/update_index.py research/
+
+# 验证文档
+python validate.py research/ai-llm/YYYY-MM-DD-topic.md
 ```
 
 ## 技能资源
 
 ### 脚本 (`scripts/`)
 
-- `validate_research.py` - 验证调研文档完整性
-- `generate_summary.py` - 自动生成 SUMMARY.md 索引
+- `update_index.py` - **自动更新 SUMMARY.md 索引** (调研后必须执行)
+- `validate.py` - 验证调研文档完整性
 
 ### 参考 (`references/`)
 
